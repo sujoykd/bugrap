@@ -18,11 +18,11 @@ public class DataGenerator {
             Logger logger = LoggerFactory.getLogger(getClass());
             if (reporterRepository.count() != 0L) {
                 logger.info("Using existing database");
-                return;
+            } else {
+                logger.info("Generating demo data");
+                dbTools.create();
+                logger.info("Generated demo data");
             }
-            logger.info("Generating demo data");
-            dbTools.create();
-            logger.info("Generated demo data");
         };
     }
 }

@@ -6,7 +6,7 @@ import org.apache.commons.lang3.ObjectUtils;
 import org.vaadin.bugrap.domain.entities.Project;
 
 import com.example.bugrap.security.SecurityService;
-import com.example.bugrap.service.ProjectService;
+import com.example.bugrap.service.BugrapService;
 import com.example.bugrap.views.bugs.events.ProjectSelectionEvent;
 import com.vaadin.flow.component.AttachEvent;
 import com.vaadin.flow.component.ClickEvent;
@@ -32,15 +32,15 @@ import com.vaadin.flow.spring.annotation.UIScope;
 @UIScope
 public class BugsReportHeader extends HorizontalLayout {
     SecurityService securityService;
-    ProjectService projectService;
+    BugrapService bugrapService;
     
     Project selectedProject;
     MenuItem projectMenuItem;
     MenuItem dropdownMenu;
     
-    public BugsReportHeader(SecurityService securityService, ProjectService projectService) {
+    public BugsReportHeader(SecurityService securityService, BugrapService bugrapService) {
         this.securityService = securityService;
-        this.projectService = projectService;
+        this.bugrapService = bugrapService;
         
         setDefaultVerticalComponentAlignment(Alignment.CENTER);
         addAndExpand(menuBar());
@@ -54,7 +54,7 @@ public class BugsReportHeader extends HorizontalLayout {
         MenuBar menuBar = new MenuBar();
         menuBar.addThemeVariants(MenuBarVariant.LUMO_TERTIARY, MenuBarVariant.LUMO_ICON);
         
-        List<Project> projects = projectService.allProjects();
+        List<Project> projects = bugrapService.allProjects();
         if (ObjectUtils.isNotEmpty(projects)) {
             projectMenuItem = menuBar.addItem("");
             

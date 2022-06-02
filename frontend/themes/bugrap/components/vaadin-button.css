@@ -1,0 +1,8 @@
+:host([theme~="selected-button"]) {
+	color: white;
+	background-color: var(--lumo-primary-color) !important;
+}
+
+:host {
+	margin: 0px;
+}

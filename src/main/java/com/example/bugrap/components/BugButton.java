@@ -1,4 +1,4 @@
-package com.example.bugrap.views;
+package com.example.bugrap.components;
 
 import com.vaadin.flow.component.Component;
 import com.vaadin.flow.component.button.Button;
@@ -16,8 +16,13 @@ public class BugButton extends Button {
         applyTheme();
     }
     
+    public BugButton(String text) {
+        super(text);
+        applyTheme();
+    }
+    
     private void applyTheme() {
         addThemeVariants(ButtonVariant.LUMO_TERTIARY);
-        getStyle().set("box-shadow", "var(--lumo-box-shadow-s");
+        getStyle().set("box-shadow", "var(--lumo-box-shadow-s)");
     }
 }

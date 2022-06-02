@@ -4,8 +4,6 @@ import javax.annotation.security.PermitAll;
 
 import org.vaadin.bugrap.domain.entities.Project;
 
-import com.example.bugrap.security.SecurityService;
-import com.example.bugrap.service.ProjectService;
 import com.example.bugrap.views.MainLayout;
 import com.vaadin.flow.component.contextmenu.MenuItem;
 import com.vaadin.flow.component.orderedlayout.VerticalLayout;
@@ -16,19 +14,15 @@ import com.vaadin.flow.router.Route;
 @Route(value = "", layout = MainLayout.class)
 @PermitAll
 public class BugsView extends VerticalLayout {
-    SecurityService securityService;
-    ProjectService projectService;
     
     Project selectedProject;
     MenuItem projectMenuItem;
     
-    public BugsView(SecurityService securityService, ProjectService projectService, BugsReportHeader bugsReportHeader,
-            BugsReportBody bugsReportBody) {
-        this.securityService = securityService;
-        this.projectService = projectService;
+    public BugsView(BugsReportHeader bugsReportHeader, BugsReportBody bugsReportBody) {
         setPadding(false);
         add(bugsReportHeader);
         add(bugsReportBody);
+        setSizeFull();
     }
     
 }
