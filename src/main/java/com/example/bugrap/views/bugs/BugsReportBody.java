@@ -34,6 +34,7 @@ import com.vaadin.flow.component.orderedlayout.HorizontalLayout;
 import com.vaadin.flow.component.orderedlayout.VerticalLayout;
 import com.vaadin.flow.component.select.Select;
 import com.vaadin.flow.component.textfield.TextField;
+import com.vaadin.flow.data.renderer.LitRenderer;
 import com.vaadin.flow.data.value.ValueChangeMode;
 import com.vaadin.flow.spring.annotation.SpringComponent;
 import com.vaadin.flow.spring.annotation.UIScope;
@@ -112,7 +113,15 @@ public class BugsReportBody extends VerticalLayout {
                 .setSortable(true)
                 .setComparator(Comparator
                         .comparing(report -> Optional.ofNullable(report.getVersion()).map(ProjectVersion::getVersion).orElse("")));
-        this.reportGrid.addColumn(report -> report.getPriority().ordinal())
+        this.reportGrid
+                .addColumn(LitRenderer
+                        .<Report>of(
+                                """
+                                        ${Array(item.priority).fill().map(_=>
+                                                html`<span style="background-color: var(--lumo-secondary-color); border-radius: 5px; margin-right: 2px; display: inline-block; width: 5px;">&nbsp;</span>`
+                                        )}
+                                        """)
+                        .withProperty("priority", report -> report.getPriority().ordinal()))
                 .setHeader("Priority")
                 .setSortable(true)
                 .setComparator(Comparator.comparing(report -> report.getPriority().ordinal()));
