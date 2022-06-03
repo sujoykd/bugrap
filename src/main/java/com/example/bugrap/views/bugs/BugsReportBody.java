@@ -1,6 +1,7 @@
 package com.example.bugrap.views.bugs;
 
 import java.util.Collections;
+import java.util.Comparator;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Optional;
@@ -15,8 +16,8 @@ import org.vaadin.bugrap.domain.entities.Reporter;
 
 import com.example.bugrap.components.BugButton;
 import com.example.bugrap.components.ComboButton;
-import com.example.bugrap.security.SecurityService;
 import com.example.bugrap.service.BugrapService;
+import com.example.bugrap.util.GenericUtil;
 import com.example.bugrap.views.bugs.events.ProjectSelectionEvent;
 import com.vaadin.flow.component.Component;
 import com.vaadin.flow.component.Text;
@@ -26,7 +27,6 @@ import com.vaadin.flow.component.contextmenu.ContextMenu;
 import com.vaadin.flow.component.contextmenu.MenuItem;
 import com.vaadin.flow.component.grid.Grid;
 import com.vaadin.flow.component.grid.Grid.Column;
-import com.vaadin.flow.component.html.Div;
 import com.vaadin.flow.component.html.Label;
 import com.vaadin.flow.component.html.Span;
 import com.vaadin.flow.component.icon.VaadinIcon;
@@ -34,29 +34,34 @@ import com.vaadin.flow.component.orderedlayout.HorizontalLayout;
 import com.vaadin.flow.component.orderedlayout.VerticalLayout;
 import com.vaadin.flow.component.select.Select;
 import com.vaadin.flow.component.textfield.TextField;
+import com.vaadin.flow.data.value.ValueChangeMode;
 import com.vaadin.flow.spring.annotation.SpringComponent;
 import com.vaadin.flow.spring.annotation.UIScope;
 
 @SpringComponent
 @UIScope
 public class BugsReportBody extends VerticalLayout {
-    SecurityService securityService;
     BugrapService bugrapService;
 
     BugsReportHeader bugsReportHeader;
+    BugDistribution bugDistribution;
+
     Select<ProjectVersion> versionSelector;
     Grid<Report> reportGrid;
     Column<Report> versionColumn;
+    ContextMenu customStatusMenu;
 
     Project selectedProject;
     ProjectVersion selectedVersion;
     boolean reportsForSelf;
     Set<Status> selectedStatusSet;
     boolean customStatusMode;
+    String searchTextValue;
 
-    public BugsReportBody(BugrapService bugrapService, BugsReportHeader bugsReportHeader) {
+    public BugsReportBody(BugrapService bugrapService, BugsReportHeader bugsReportHeader, BugDistribution bugDistribution) {
         this.bugrapService = bugrapService;
         this.bugsReportHeader = bugsReportHeader;
+        this.bugDistribution = bugDistribution;
 
         this.reportsForSelf = true;
         this.selectedStatusSet = Collections.emptySet();
@@ -75,7 +80,7 @@ public class BugsReportBody extends VerticalLayout {
         this.bugsReportHeader.addListener(ProjectSelectionEvent.class, event -> {
             this.selectedProject = event.getProject();
             final List<ProjectVersion> versions = this.bugrapService.versions(this.selectedProject);
-            if (ObjectUtils.isNotEmpty(this.selectedProject)) {
+            if (ObjectUtils.isNotEmpty(versions)) {
                 this.versionSelector.setItems(versions);
                 this.versionSelector.setItemLabelGenerator(ProjectVersion::toString);
                 this.versionSelector.setValue(versions.get(0));
@@ -103,14 +108,29 @@ public class BugsReportBody extends VerticalLayout {
 
         this.versionColumn = this.reportGrid
                 .addColumn(report -> Optional.ofNullable(report.getVersion()).map(ProjectVersion::getVersion).orElse(""))
-                .setHeader("Version");
-        this.reportGrid.addColumn(report -> report.getPriority().ordinal()).setHeader("Priority");
-        this.reportGrid.addColumn(Report::getType).setHeader("Type");
-        this.reportGrid.addColumn(Report::getSummary).setHeader("Summary");
+                .setHeader("Version")
+                .setSortable(true)
+                .setComparator(Comparator
+                        .comparing(report -> Optional.ofNullable(report.getVersion()).map(ProjectVersion::getVersion).orElse("")));
+        this.reportGrid.addColumn(report -> report.getPriority().ordinal())
+                .setHeader("Priority")
+                .setSortable(true)
+                .setComparator(Comparator.comparing(report -> report.getPriority().ordinal()));
+        this.reportGrid.addColumn(Report::getType)
+                .setHeader("Type")
+                .setSortable(true);
+        this.reportGrid.addColumn(Report::getSummary)
+                .setHeader("Summary")
+                .setSortable(true);
         this.reportGrid.addColumn(report -> Optional.ofNullable(report.getAssigned()).map(Reporter::getName).orElse(""))
-                .setHeader("Assigned to");
-        this.reportGrid.addColumn(Report::getTimestamp).setHeader("Last modified");
-        this.reportGrid.addColumn(Report::getReportedTimestamp).setHeader("Reported");
+                .setHeader("Assigned to")
+                .setSortable(true);
+        this.reportGrid.addColumn(report -> GenericUtil.relativeTimeSpan(report.getTimestamp()))
+                .setHeader("Last modified")
+                .setSortable(true);
+        this.reportGrid.addColumn(report -> GenericUtil.relativeTimeSpan(report.getReportedTimestamp()))
+                .setHeader("Reported")
+                .setSortable(true);
 
         this.reportGrid.addSelectionListener(selection -> {
             System.out.printf("Number of selected items: %s%n", selection.getAllSelectedItems().size());
@@ -129,13 +149,14 @@ public class BugsReportBody extends VerticalLayout {
             if (event.getValue() != null) {
                 this.selectedVersion = event.getValue();
                 this.versionColumn.setVisible(this.selectedVersion == BugrapService.ALL_VERSIONS);
+                this.bugDistribution.updateBar(this.selectedProject, this.selectedVersion);
                 this.updateReportGrid();
             }
         });
 
         versionRow.add(new Text("Reports for"));
         versionRow.add(this.versionSelector);
-        versionRow.addAndExpand(new Div(new Text("Placeholder for distribution chart")));
+        versionRow.addAndExpand(this.bugDistribution);
         return versionRow;
     }
 
@@ -163,15 +184,16 @@ public class BugsReportBody extends VerticalLayout {
             if (!this.customStatusMode) {
                 this.customStatusMode = true;
                 this.selectedStatusSet = new HashSet<>();
+                this.customStatusMenu.getItems().forEach(mItem -> mItem.setChecked(false));
                 this.updateReportGrid();
             }
         });
-        final ContextMenu menu = new ContextMenu();
-        menu.setTarget(customButton);
-        menu.setOpenOnClick(true);
+        this.customStatusMenu = new ContextMenu();
+        this.customStatusMenu.setTarget(customButton);
+        this.customStatusMenu.setOpenOnClick(true);
 
         for (final Status status : Report.Status.values()) {
-            final MenuItem menuItem = menu.addItem(status.toString(), event -> {
+            final MenuItem menuItem = this.customStatusMenu.addItem(status.toString(), event -> {
                 if (event.getSource().isChecked()) {
                     this.selectedStatusSet.add(status);
                 } else {
@@ -215,6 +237,11 @@ public class BugsReportBody extends VerticalLayout {
         textField.setPlaceholder("Search...");
         textField.setClearButtonVisible(true);
         textField.setPrefixComponent(VaadinIcon.SEARCH.create());
+        textField.setValueChangeMode(ValueChangeMode.LAZY);
+        textField.addValueChangeListener(event -> {
+            this.searchTextValue = event.getValue();
+            this.updateReportGrid();
+        });
         layout.add(textField);
 
         return layout;
@@ -244,6 +271,6 @@ public class BugsReportBody extends VerticalLayout {
     private void updateReportGrid() {
         this.reportGrid.setItems(Collections.emptyList());
         this.reportGrid.setItems(query -> this.bugrapService.reportsFor(this.selectedProject, this.selectedVersion, this.reportsForSelf,
-                this.selectedStatusSet, query));
+                this.selectedStatusSet, this.searchTextValue, query));
     }
 }
