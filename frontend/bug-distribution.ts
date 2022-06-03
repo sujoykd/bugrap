@@ -25,19 +25,21 @@ export class BugDistribution extends LitElement {
             .ui-closed {
                 background-color: var(--lumo-primary-color);
                 flex-shrink: 1;
-                flex-basis: 10px
+                flex-basis: 10px;
+                border-radius: 5px 0px 0px 5px;
             }
 
             .ui-unresolved {
                 background-color: var(--lumo-secondary-color);
                 flex-shrink: 1;
-                flex-basis: 10px
+                flex-basis: 10px;
             }
 
             .ui-unassigned {
                 background-color: var(--lumo-tertiary-color);
                 flex-shrink: 1;
-                flex-basis: 10px
+                flex-basis: 10px;
+                border-radius: 0px 5px 5px 0px;
             }
         `;
     }
