@@ -14,15 +14,15 @@ import com.vaadin.flow.router.Route;
 @Route(value = "", layout = MainLayout.class)
 @PermitAll
 public class BugsView extends VerticalLayout {
-    
+
     Project selectedProject;
     MenuItem projectMenuItem;
-    
-    public BugsView(BugsReportHeader bugsReportHeader, BugsReportBody bugsReportBody) {
-        setPadding(false);
-        add(bugsReportHeader);
-        add(bugsReportBody);
-        setSizeFull();
+
+    public BugsView(BugsReportHeader bugsReportHeader, BugSplitter bugSplitter) {
+        this.setPadding(false);
+        this.add(bugsReportHeader);
+        this.add(bugSplitter);
+        this.setSizeFull();
     }
-    
+
 }

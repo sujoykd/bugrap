@@ -3,6 +3,7 @@ package com.example.bugrap.views.bugs;
 import java.util.List;
 
 import org.apache.commons.lang3.ObjectUtils;
+import org.springframework.security.core.userdetails.UserDetails;
 import org.vaadin.bugrap.domain.entities.Project;
 
 import com.example.bugrap.security.SecurityService;
@@ -33,76 +34,76 @@ import com.vaadin.flow.spring.annotation.UIScope;
 public class BugsReportHeader extends HorizontalLayout {
     SecurityService securityService;
     BugrapService bugrapService;
-    
+
     Project selectedProject;
     MenuItem projectMenuItem;
     MenuItem dropdownMenu;
-    
+
     public BugsReportHeader(SecurityService securityService, BugrapService bugrapService) {
         this.securityService = securityService;
         this.bugrapService = bugrapService;
-        
-        setDefaultVerticalComponentAlignment(Alignment.CENTER);
-        addAndExpand(menuBar());
-        add(logOut());
-        getStyle().set("box-shadow", "var(--lumo-box-shadow-s");
-        getStyle().set("padding-left", "var(--lumo-space-m)");
-        getStyle().set("padding-right", "var(--lumo-space-m)");
+
+        this.setDefaultVerticalComponentAlignment(Alignment.CENTER);
+        this.addAndExpand(this.menuBar());
+        this.add(this.logOut());
+        this.getStyle().set("box-shadow", "var(--lumo-box-shadow-s");
+        this.getStyle().set("padding-left", "var(--lumo-space-m)");
+        this.getStyle().set("padding-right", "var(--lumo-space-m)");
     }
-    
+
     public Component menuBar() {
-        MenuBar menuBar = new MenuBar();
+        final MenuBar menuBar = new MenuBar();
         menuBar.addThemeVariants(MenuBarVariant.LUMO_TERTIARY, MenuBarVariant.LUMO_ICON);
-        
-        List<Project> projects = bugrapService.allProjects();
-        if (ObjectUtils.isNotEmpty(projects)) {
-            projectMenuItem = menuBar.addItem("");
-            
-            dropdownMenu = menuBar.addItem(new Icon(VaadinIcon.CHEVRON_DOWN));
-            projects.stream().forEach(project -> dropdownMenu.getSubMenu().addItem(project.getName(), event -> {
-                this.selectedProject = project;
-                projectMenuItem.setText(this.selectedProject.getName());
-                fireEvent(new ProjectSelectionEvent(this, project));
-            }));
-        } else {
+
+        final List<Project> projects = this.bugrapService.allProjects();
+        if (!ObjectUtils.isNotEmpty(projects)) {
             return new H2("No projects found.");
         }
+        this.projectMenuItem = menuBar.addItem("");
+
+        this.dropdownMenu = menuBar.addItem(new Icon(VaadinIcon.CHEVRON_DOWN));
+        projects.stream().forEach(project -> this.dropdownMenu.getSubMenu().addItem(project.getName(), event -> {
+            this.selectedProject = project;
+            this.projectMenuItem.setText(this.selectedProject.getName());
+            this.fireEvent(new ProjectSelectionEvent(this, project));
+        }));
         return menuBar;
     }
-    
+
     private void selectFirstProjectByDefault() {
-        MenuItem firstProject = dropdownMenu.getSubMenu().getItems().get(0);
+        final MenuItem firstProject = this.dropdownMenu.getSubMenu().getItems().get(0);
         ComponentUtil.fireEvent(firstProject, new ClickEvent<MenuItem>(firstProject));
     }
-    
+
     public Component logOut() {
-        HorizontalLayout layout = new HorizontalLayout();
+        final HorizontalLayout layout = new HorizontalLayout();
         layout.setDefaultVerticalComponentAlignment(Alignment.CENTER);
-        
-        Icon userIcon = new Icon(VaadinIcon.USER);
+
+        final Icon userIcon = new Icon(VaadinIcon.USER);
         userIcon.getStyle().set("width", "var(--lumo-icon-size-s)");
         userIcon.getStyle().set("height", "var(--lumo-icon-size-s)");
         userIcon.getStyle().set("color", "var(--lumo-primary-text-color)");
-        
-        Span userSpan = new Span();
-        userSpan.add(this.securityService.get().map(user -> user.getUsername()).orElse(""));
-        
-        Button logoutButton = new Button(new Icon(VaadinIcon.POWER_OFF), e -> securityService.logout());
+
+        final Span userSpan = new Span();
+        userSpan.add(this.securityService.get().map(UserDetails::getUsername).orElse(""));
+
+        final Button logoutButton = new Button(new Icon(VaadinIcon.POWER_OFF), e -> this.securityService.logout());
         logoutButton.addThemeVariants(ButtonVariant.LUMO_TERTIARY, ButtonVariant.LUMO_ICON);
         logoutButton.getElement().setAttribute("aria-label", "Log Out");
-        
+
         layout.add(userIcon, userSpan, logoutButton);
         return layout;
     }
-    
+
+    @Override
     public <T extends ComponentEvent<?>> Registration addListener(Class<T> eventType, ComponentEventListener<T> listener) {
-        return getEventBus().addListener(eventType, listener);
+        return this.getEventBus().addListener(eventType, listener);
     }
-    
+
     @Override
     protected void onAttach(AttachEvent attachEvent) {
         super.onAttach(attachEvent);
-        selectFirstProjectByDefault();
+        this.selectFirstProjectByDefault();
     }
-    
+
 }

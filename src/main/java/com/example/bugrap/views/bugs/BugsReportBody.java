@@ -19,7 +19,10 @@ import com.example.bugrap.components.ComboButton;
 import com.example.bugrap.service.BugrapService;
 import com.example.bugrap.util.GenericUtil;
 import com.example.bugrap.views.bugs.events.ProjectSelectionEvent;
+import com.example.bugrap.views.bugs.events.ReportSelectionEvent;
 import com.vaadin.flow.component.Component;
+import com.vaadin.flow.component.ComponentEvent;
+import com.vaadin.flow.component.ComponentEventListener;
 import com.vaadin.flow.component.Text;
 import com.vaadin.flow.component.button.Button;
 import com.vaadin.flow.component.button.ButtonVariant;
@@ -36,6 +39,7 @@ import com.vaadin.flow.component.select.Select;
 import com.vaadin.flow.component.textfield.TextField;
 import com.vaadin.flow.data.renderer.LitRenderer;
 import com.vaadin.flow.data.value.ValueChangeMode;
+import com.vaadin.flow.shared.Registration;
 import com.vaadin.flow.spring.annotation.SpringComponent;
 import com.vaadin.flow.spring.annotation.UIScope;
 
@@ -73,6 +77,7 @@ public class BugsReportBody extends VerticalLayout {
         this.setPadding(false);
         this.getStyle().set("padding-left", "var(--lumo-space-m)");
         this.getStyle().set("padding-right", "var(--lumo-space-m)");
+        this.getStyle().set("padding-bottom", "var(--lumo-space-m)");
         this.setupEventHandlers();
         this.setSizeFull();
     }
@@ -142,7 +147,7 @@ public class BugsReportBody extends VerticalLayout {
                 .setSortable(true);
 
         this.reportGrid.addSelectionListener(selection -> {
-            System.out.printf("Number of selected items: %s%n", selection.getAllSelectedItems().size());
+            this.fireEvent(new ReportSelectionEvent(this, selection.getAllSelectedItems()));
         });
 
         return this.reportGrid;
@@ -281,5 +286,10 @@ public class BugsReportBody extends VerticalLayout {
         this.reportGrid.setItems(Collections.emptyList());
         this.reportGrid.setItems(query -> this.bugrapService.reportsFor(this.selectedProject, this.selectedVersion, this.reportsForSelf,
                 this.selectedStatusSet, this.searchTextValue, query));
+    }
+
+    @Override
+    public <T extends ComponentEvent<?>> Registration addListener(Class<T> eventType, ComponentEventListener<T> listener) {
+        return this.getEventBus().addListener(eventType, listener);
     }
 }
