@@ -1,4 +1,4 @@
-package com.example.bugrap.views.bugs;
+package com.example.bugrap.views.bugs.webcomponent;
 
 import org.vaadin.bugrap.domain.entities.Project;
 import org.vaadin.bugrap.domain.entities.ProjectVersion;
@@ -11,29 +11,25 @@ import com.vaadin.flow.component.orderedlayout.FlexLayout;
 import com.vaadin.flow.spring.annotation.SpringComponent;
 import com.vaadin.flow.spring.annotation.UIScope;
 
-@JsModule("./bug-distribution.ts")
+@JsModule("./component/bug-distribution.ts")
 @Tag("bug-distribution")
 @SpringComponent
 @UIScope
 public class BugDistribution extends FlexLayout {
-
+    
     BugrapService bugrapService;
-
+    
     public BugDistribution(BugrapService bugrapService) {
         this.bugrapService = bugrapService;
         this.setJustifyContentMode(JustifyContentMode.START);
     }
-
-    public void setBugrapService(BugrapService bugrapService) {
-        this.bugrapService = bugrapService;
-    }
-
+    
     public void updateBar(Project project, ProjectVersion version) {
         final BugDistributionData data = this.bugrapService.fetchBugDistributionData(project, version);
-
+        
         this.getElement().setProperty("closedBugs", data.getClosed());
         this.getElement().setProperty("assignedUnresolvedBugs", data.getAssignedUnresolved());
         this.getElement().setProperty("unassignedBugs", data.getUnassigned());
-
+        
     }
 }
