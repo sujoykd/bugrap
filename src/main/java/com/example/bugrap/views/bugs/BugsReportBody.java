@@ -8,6 +8,7 @@ import java.util.Optional;
 import java.util.Set;
 
 import org.apache.commons.lang3.ObjectUtils;
+import org.springframework.util.StringUtils;
 import org.vaadin.bugrap.domain.entities.Project;
 import org.vaadin.bugrap.domain.entities.ProjectVersion;
 import org.vaadin.bugrap.domain.entities.Report;
@@ -15,13 +16,13 @@ import org.vaadin.bugrap.domain.entities.Report.Status;
 import org.vaadin.bugrap.domain.entities.Reporter;
 
 import com.example.bugrap.components.BugButton;
+import com.example.bugrap.components.BugPriorityDisplay;
 import com.example.bugrap.components.ComboButton;
 import com.example.bugrap.service.BugrapService;
 import com.example.bugrap.util.GenericUtil;
 import com.example.bugrap.views.bugs.events.ProjectSelectionEvent;
 import com.example.bugrap.views.bugs.events.ReportSelectionEvent;
 import com.example.bugrap.views.bugs.webcomponent.BugDistribution;
-import com.example.bugrap.views.bugs.webcomponent.BugPriority;
 import com.vaadin.flow.component.Component;
 import com.vaadin.flow.component.ComponentEvent;
 import com.vaadin.flow.component.ComponentEventListener;
@@ -76,12 +77,9 @@ public class BugsReportBody extends VerticalLayout {
 
         this.add(this.topSection());
         this.add(this.tableSection());
-        this.setPadding(false);
-        this.getStyle().set("padding-left", "var(--lumo-space-m)");
-        this.getStyle().set("padding-right", "var(--lumo-space-m)");
-        this.getStyle().set("padding-bottom", "var(--lumo-space-m)");
         this.setupEventHandlers();
         this.setSizeFull();
+        this.getStyle().set("background-color", "var(--lumo-contrast-5pct)");
     }
 
     private void setupEventHandlers() {
@@ -102,6 +100,7 @@ public class BugsReportBody extends VerticalLayout {
     private Component tableSection() {
         final VerticalLayout layout = new VerticalLayout();
         layout.getStyle().set("box-shadow", "var(--lumo-box-shadow-s)");
+        layout.getStyle().set("background-color", "var(--lumo-base-color)");
         layout.setSizeFull();
         layout.add(this.versionRow());
         layout.add(this.filterRow());
@@ -121,13 +120,13 @@ public class BugsReportBody extends VerticalLayout {
                 .setComparator(Comparator
                         .comparing(report -> Optional.ofNullable(report.getVersion()).map(ProjectVersion::getVersion).orElse("")));
         this.reportGrid
-                .addColumn(new ComponentRenderer<>(BugPriority::new, (bugPriority, report) -> {
-                    bugPriority.update(report.getPriority().ordinal());
-                }))
+                .addColumn(new ComponentRenderer<>(report -> new BugPriorityDisplay(report.getPriority())))
                 .setHeader("Priority")
                 .setSortable(true)
                 .setComparator(Comparator.comparing(report -> report.getPriority().ordinal()));
-        this.reportGrid.addColumn(Report::getType)
+        this.reportGrid
+                .addColumn(report -> Optional.ofNullable(report.getType())
+                        .map(type -> StringUtils.capitalize(type.toString().toLowerCase())).orElse(""))
                 .setHeader("Type")
                 .setSortable(true);
         this.reportGrid.addColumn(Report::getSummary)
@@ -261,9 +260,9 @@ public class BugsReportBody extends VerticalLayout {
     private Component topButtons() {
         final HorizontalLayout layout = new HorizontalLayout();
 
-        final Button reportBugBtn = new BugButton("Report a bug", VaadinIcon.BUG.create());
+        final Button reportBugBtn = new BugButton("Report a bug", VaadinIcon.BUG.create()).lumoBaseColor();
 
-        final Button requestFeatureBtn = new BugButton("Request a feature", VaadinIcon.LIGHTBULB.create());
+        final Button requestFeatureBtn = new BugButton("Request a feature", VaadinIcon.LIGHTBULB.create()).lumoBaseColor();
 
         final Span projectCountBadge = new Span(String.valueOf(this.bugrapService.projectCount()));
         projectCountBadge.getElement().getThemeList().add("badge success small pill");
@@ -273,7 +272,7 @@ public class BugsReportBody extends VerticalLayout {
         manageProject.add("Manage Project");
         manageProject.add(projectCountBadge);
 
-        final Button manageProjectBtn = new BugButton(manageProject);
+        final Button manageProjectBtn = new BugButton(manageProject).lumoBaseColor();
 
         layout.add(reportBugBtn, requestFeatureBtn, manageProjectBtn, manageProjectBtn);
         return layout;

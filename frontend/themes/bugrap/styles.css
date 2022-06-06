@@ -14,3 +14,16 @@
       --lumo-tertiary-color: #DF9135;
       --lumo-tertiary-text-color: #BC8341;
 }
+
+
+
+.ui-bug-priority {
+      content: ' ';
+	background-color: var(--lumo-secondary-color);
+      line-height: var(--lumo-line-height-s);
+      height: 22px;
+	border-radius: 5px;
+	margin-right: 2px;
+	display: inline-block;
+	width: 5px;
+}

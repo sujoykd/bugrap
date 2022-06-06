@@ -1,7 +1,10 @@
 package com.example.bugrap.service;
 
+import java.util.Arrays;
+import java.util.Comparator;
 import java.util.List;
 import java.util.Set;
+import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
 import org.apache.commons.lang3.ObjectUtils;
@@ -11,11 +14,15 @@ import org.springframework.data.domain.ExampleMatcher.GenericPropertyMatchers;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Sort;
 import org.springframework.security.core.userdetails.UserDetails;
+import org.vaadin.bugrap.domain.entities.Comment;
 import org.vaadin.bugrap.domain.entities.Project;
 import org.vaadin.bugrap.domain.entities.ProjectVersion;
 import org.vaadin.bugrap.domain.entities.Report;
+import org.vaadin.bugrap.domain.entities.Report.Priority;
 import org.vaadin.bugrap.domain.entities.Report.Status;
+import org.vaadin.bugrap.domain.entities.Report.Type;
 import org.vaadin.bugrap.domain.entities.Reporter;
+import org.vaadin.bugrap.domain.spring.CommentRepository;
 import org.vaadin.bugrap.domain.spring.ProjectRepository;
 import org.vaadin.bugrap.domain.spring.ProjectVersionRepository;
 import org.vaadin.bugrap.domain.spring.ReportRepository;
@@ -38,14 +45,16 @@ public class BugrapService {
     ReportRepository reportRepository;
     SecurityService securityService;
     ReporterRepository reporterRepository;
+    CommentRepository commentRepository;
 
     public BugrapService(SecurityService securityService, ProjectRepository projectRepository, ReporterRepository reporterRepository,
-            ProjectVersionRepository projectVersionRepository, ReportRepository reportRepository) {
+            ProjectVersionRepository projectVersionRepository, ReportRepository reportRepository, CommentRepository commentRepository) {
         this.securityService = securityService;
         this.projectRepository = projectRepository;
         this.reporterRepository = reporterRepository;
         this.projectVersionRepository = projectVersionRepository;
         this.reportRepository = reportRepository;
+        this.commentRepository = commentRepository;
     }
 
     public List<Project> allProjects() {
@@ -62,6 +71,26 @@ public class BugrapService {
             projectVersions.add(0, ALL_VERSIONS);
         }
         return projectVersions;
+    }
+
+    public List<ProjectVersion> projectVersions(Project project) {
+        return this.projectVersionRepository.findAllByProject(project);
+    }
+
+    public List<Reporter> allReporters() {
+        return this.reporterRepository.findAll();
+    }
+
+    public List<Status> allStatuses() {
+        return Arrays.asList(Report.Status.values());
+    }
+
+    public List<Type> allReportTypes() {
+        return Arrays.asList(Report.Type.values());
+    }
+
+    public List<Priority> allPriorities() {
+        return Stream.of(Report.Priority.values()).sorted(Comparator.reverseOrder()).collect(Collectors.toList());
     }
 
     public Stream<Report> reportsFor(Project project, ProjectVersion projectVersion, boolean reportsForSelf, Set<Status> selectedStatusSet,
@@ -110,6 +139,10 @@ public class BugrapService {
         final long unassigned = reports.stream().filter(rpt -> rpt.getAssigned() == null && rpt.getStatus() == Status.OPEN).count();
 
         return new BugDistributionData(closed, assignedUnresolved, unassigned);
+    }
+
+    public List<Comment> allComments(Report report) {
+        return this.commentRepository.findAllByReportOrderByTimestampDesc(report);
     }
 
 }

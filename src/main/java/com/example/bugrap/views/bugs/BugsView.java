@@ -19,6 +19,7 @@ public class BugsView extends VerticalLayout {
     MenuItem projectMenuItem;
 
     public BugsView(BugsReportHeader bugsReportHeader, BugSplitter bugSplitter) {
+        this.setSpacing(false);
         this.setPadding(false);
         this.add(bugsReportHeader);
         this.add(bugSplitter);

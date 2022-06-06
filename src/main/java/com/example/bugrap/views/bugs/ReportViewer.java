@@ -35,20 +35,29 @@ public class ReportViewer extends VerticalLayout {
         this.bugsReportBody.addListener(ReportSelectionEvent.class, event -> {
             final Set<Report> reports = event.getReports();
             if (ObjectUtils.isNotEmpty(reports)) {
+                this.removeAll();
+
                 if (reports.size() > 1 && !this.multimode) {
-                    this.multimode = true;
-                    this.removeAll();
-                    this.add(this.multiReportViewer);
+                    this.setupMultiReportView(reports);
                 } else if (reports.size() == 1) {
-                    this.multimode = false;
-                    this.removeAll();
-                    this.add(this.singleReportViewer);
+                    this.setupSingleReportView(reports.iterator().next());
                 }
             } else {
                 this.multimode = false;
                 this.removeAll();
             }
         });
+    }
+
+    private void setupMultiReportView(Set<Report> reports) {
+        this.multimode = true;
+        this.add(this.multiReportViewer);
+    }
+
+    private void setupSingleReportView(Report report) {
+        this.multimode = false;
+        this.add(this.singleReportViewer);
+        this.singleReportViewer.forReport(this.bugsReportBody.selectedProject, report);
     }
 
 }

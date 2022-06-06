@@ -5,24 +5,34 @@ import com.vaadin.flow.component.button.Button;
 import com.vaadin.flow.component.button.ButtonVariant;
 
 public class BugButton extends Button {
-    
+
     public BugButton(Component icon) {
         super(icon);
-        applyTheme();
+        this.applyStyles();
     }
-    
+
     public BugButton(String text, Component icon) {
         super(text, icon);
-        applyTheme();
+        this.applyStyles();
     }
-    
+
     public BugButton(String text) {
         super(text);
-        applyTheme();
+        this.applyStyles();
     }
-    
-    private void applyTheme() {
-        addThemeVariants(ButtonVariant.LUMO_TERTIARY);
-        getStyle().set("box-shadow", "var(--lumo-box-shadow-s)");
+
+    private void applyStyles() {
+        this.getStyle().set("box-shadow", "var(--lumo-box-shadow-s)");
+
+    }
+
+    public BugButton lumoBaseColor() {
+        this.getStyle().set("background-color", "var(--lumo-base-color)");
+        return this;
+    }
+
+    public BugButton withTheme(ButtonVariant... buttonVariants) {
+        this.addThemeVariants(buttonVariants);
+        return this;
     }
 }
