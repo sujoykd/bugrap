@@ -1,4 +1,4 @@
-package com.example.bugrap.views.bugs;
+package com.example.bugrap.views.bugs.viewcomponents;
 
 import java.util.Set;
 
@@ -17,14 +17,10 @@ public class ReportViewer extends VerticalLayout {
     SingleReportViewer singleReportViewer;
     MultiReportViewer multiReportViewer;
 
-    boolean multimode;
-
     public ReportViewer(BugsReportBody bugsReportBody, SingleReportViewer singleReportViewer, MultiReportViewer multiReportViewer) {
         this.bugsReportBody = bugsReportBody;
         this.singleReportViewer = singleReportViewer;
         this.multiReportViewer = multiReportViewer;
-
-        this.multimode = false;
 
         this.setSpacing(false);
         this.setPadding(false);
@@ -35,29 +31,27 @@ public class ReportViewer extends VerticalLayout {
         this.bugsReportBody.addListener(ReportSelectionEvent.class, event -> {
             final Set<Report> reports = event.getReports();
             if (ObjectUtils.isNotEmpty(reports)) {
-                this.removeAll();
-
-                if (reports.size() > 1 && !this.multimode) {
+                if (reports.size() > 1) {
                     this.setupMultiReportView(reports);
                 } else if (reports.size() == 1) {
                     this.setupSingleReportView(reports.iterator().next());
                 }
             } else {
-                this.multimode = false;
                 this.removeAll();
             }
         });
     }
 
     private void setupMultiReportView(Set<Report> reports) {
-        this.multimode = true;
+        this.removeAll();
         this.add(this.multiReportViewer);
+        this.multiReportViewer.forReports(reports);
     }
 
     private void setupSingleReportView(Report report) {
-        this.multimode = false;
+        this.removeAll();
         this.add(this.singleReportViewer);
-        this.singleReportViewer.forReport(this.bugsReportBody.selectedProject, report);
+        this.singleReportViewer.forReport(report);
     }
 
 }

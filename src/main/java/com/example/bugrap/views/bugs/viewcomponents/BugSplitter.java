@@ -1,4 +1,4 @@
-package com.example.bugrap.views.bugs;
+package com.example.bugrap.views.bugs.viewcomponents;
 
 import java.util.Set;
 

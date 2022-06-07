@@ -4,7 +4,7 @@ import java.util.Set;
 
 import org.vaadin.bugrap.domain.entities.Report;
 
-import com.example.bugrap.views.bugs.BugsReportBody;
+import com.example.bugrap.views.bugs.viewcomponents.BugsReportBody;
 import com.vaadin.flow.component.ComponentEvent;
 
 public class ReportSelectionEvent extends ComponentEvent<BugsReportBody> {

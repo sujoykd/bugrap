@@ -1,4 +1,4 @@
-package com.example.bugrap.views.bugs;
+package com.example.bugrap.views.bugs.viewcomponents;
 
 import java.util.Collections;
 import java.util.Comparator;
@@ -20,6 +20,7 @@ import com.example.bugrap.components.BugPriorityDisplay;
 import com.example.bugrap.components.ComboButton;
 import com.example.bugrap.service.BugrapService;
 import com.example.bugrap.util.GenericUtil;
+import com.example.bugrap.views.bugs.FullReportView;
 import com.example.bugrap.views.bugs.events.ProjectSelectionEvent;
 import com.example.bugrap.views.bugs.events.ReportSelectionEvent;
 import com.example.bugrap.views.bugs.webcomponent.BugDistribution;
@@ -42,6 +43,8 @@ import com.vaadin.flow.component.select.Select;
 import com.vaadin.flow.component.textfield.TextField;
 import com.vaadin.flow.data.renderer.ComponentRenderer;
 import com.vaadin.flow.data.value.ValueChangeMode;
+import com.vaadin.flow.router.RouterLink;
+import com.vaadin.flow.server.VaadinSession;
 import com.vaadin.flow.shared.Registration;
 import com.vaadin.flow.spring.annotation.SpringComponent;
 import com.vaadin.flow.spring.annotation.UIScope;
@@ -146,6 +149,21 @@ public class BugsReportBody extends VerticalLayout {
             this.fireEvent(new ReportSelectionEvent(this, selection.getAllSelectedItems()));
         });
 
+        final RouterLink link = new RouterLink(null, FullReportView.class);
+        this.reportGrid.addItemDoubleClickListener(event -> {
+            VaadinSession.getCurrent().setAttribute(Report.class, event.getItem());
+            this.getUI().ifPresent(ui -> ui.getPage().open(link.getHref()));
+        });
+
+        this.reportGrid.addItemClickListener(event -> {
+            final Report report = event.getItem();
+            if (this.reportGrid.getSelectionModel().isSelected(report)) {
+                this.reportGrid.deselect(report);
+            } else {
+                this.reportGrid.select(report);
+            }
+        });
+
         return this.reportGrid;
     }
 
@@ -240,6 +258,7 @@ public class BugsReportBody extends VerticalLayout {
 
     private Component topSection() {
         final HorizontalLayout layout = new HorizontalLayout();
+        layout.setAlignItems(Alignment.BASELINE);
         layout.addAndExpand(this.topButtons());
 
         final TextField textField = new TextField();
