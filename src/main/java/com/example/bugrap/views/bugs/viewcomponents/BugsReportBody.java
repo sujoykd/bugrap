@@ -83,6 +83,7 @@ public class BugsReportBody extends VerticalLayout {
         this.setupEventHandlers();
         this.setSizeFull();
         this.getStyle().set("background-color", "var(--lumo-contrast-5pct)");
+        this.getStyle().set("padding", "var(--lumo-space-l)");
     }
 
     private void setupEventHandlers() {
@@ -285,6 +286,8 @@ public class BugsReportBody extends VerticalLayout {
 
         final Span projectCountBadge = new Span(String.valueOf(this.bugrapService.projectCount()));
         projectCountBadge.getElement().getThemeList().add("badge success small pill");
+        projectCountBadge.getStyle().set("background-color", "var(--lumo-secondary-color)");
+        projectCountBadge.getStyle().set("color", "var(--lumo-base-color)");
 
         final HorizontalLayout manageProject = new HorizontalLayout();
         manageProject.add(VaadinIcon.COG.create());

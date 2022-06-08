@@ -5,7 +5,9 @@ import javax.annotation.security.PermitAll;
 import org.vaadin.bugrap.domain.entities.Report;
 
 import com.example.bugrap.service.BugrapService;
-import com.vaadin.flow.component.Text;
+import com.example.bugrap.views.bugs.viewcomponents.FullViewCommentEditor;
+import com.example.bugrap.views.bugs.viewcomponents.FullViewHeader;
+import com.example.bugrap.views.bugs.viewcomponents.SingleReportViewer;
 import com.vaadin.flow.component.UI;
 import com.vaadin.flow.component.notification.Notification;
 import com.vaadin.flow.component.notification.Notification.Position;
@@ -23,8 +25,16 @@ public class FullReportView extends VerticalLayout implements AfterNavigationObs
     Report report;
     BugrapService bugrapService;
 
-    public FullReportView(BugrapService bugrapService) {
+    SingleReportViewer singleReportViewer;
+    FullViewCommentEditor fullViewCommentEditor;
+
+    public FullReportView(BugrapService bugrapService, SingleReportViewer singleReportViewer, FullViewCommentEditor fullViewCommentEditor) {
         this.bugrapService = bugrapService;
+        this.singleReportViewer = singleReportViewer;
+        this.fullViewCommentEditor = fullViewCommentEditor;
+        this.setPadding(false);
+        this.setSpacing(false);
+        this.setSizeFull();
     }
 
     @Override
@@ -32,14 +42,19 @@ public class FullReportView extends VerticalLayout implements AfterNavigationObs
         this.report = VaadinSession.getCurrent().getAttribute(Report.class);
         if (this.report == null) {
             UI.getCurrent().navigate(BugsView.class);
-            Notification.show("Please select a report", 1000, Position.TOP_CENTER);
+            Notification.show("Please select a report", 5000, Position.TOP_CENTER);
         } else {
             this.setupUI();
         }
     }
 
     private void setupUI() {
-        this.add(new Text(this.report.getDescription()));
+        this.add(new FullViewHeader(this.report));
+        this.addAndExpand(this.singleReportViewer);
+        this.singleReportViewer.forReport(this.report, false);
+
+        this.add(this.fullViewCommentEditor);
+        this.fullViewCommentEditor.forReport(this.report);
     }
 
 }

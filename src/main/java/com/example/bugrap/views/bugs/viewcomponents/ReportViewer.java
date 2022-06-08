@@ -51,7 +51,7 @@ public class ReportViewer extends VerticalLayout {
     private void setupSingleReportView(Report report) {
         this.removeAll();
         this.add(this.singleReportViewer);
-        this.singleReportViewer.forReport(report);
+        this.singleReportViewer.forReport(report, true);
     }
 
 }

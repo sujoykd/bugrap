@@ -37,14 +37,14 @@ public class SingleReportViewer extends VerticalLayout {
     public SingleReportViewer(BugrapService bugrapService) {
         this.bugrapService = bugrapService;
         this.getStyle().set("background-color", "var(--lumo-contrast-5pct)");
-        this.setWidthFull();
-        this.getStyle().set("height", "100vh");
+        this.getStyle().set("padding", "var(--lumo-space-l)");
+        this.setSizeFull();
     }
 
-    public void forReport(Report report) {
+    public void forReport(Report report, boolean showOpenButton) {
         this.report = report;
 
-        this.add(this.heading());
+        this.add(this.heading(showOpenButton));
         this.add(new BugReportEdit(this.report, this.bugrapService));
         this.add(this.comments());
     }
@@ -66,22 +66,26 @@ public class SingleReportViewer extends VerticalLayout {
         return scroller;
     }
 
-    private Component heading() {
+    private Component heading(boolean showOpenButton) {
         final FlexLayout layout = new FlexLayout();
 
         final Span heading = new Span(this.report.getSummary());
         heading.getStyle().set("font-weight", "bold");
-        final Button open = new Button("Open", VaadinIcon.EXTERNAL_LINK.create());
-        open.addThemeVariants(ButtonVariant.LUMO_TERTIARY);
+        layout.add(heading);
 
-        final RouterLink link = new RouterLink(null, FullReportView.class);
-        open.addClickListener(event -> {
-            VaadinSession.getCurrent().setAttribute(Report.class, this.report);
-            this.getUI().ifPresent(ui -> ui.getPage().open(link.getHref()));
-        });
-        open.addClickShortcut(Key.ENTER, KeyModifier.CONTROL);
+        if (showOpenButton) {
+            final Button open = new Button("Open", VaadinIcon.EXTERNAL_LINK.create());
+            open.addThemeVariants(ButtonVariant.LUMO_TERTIARY);
 
-        layout.add(heading, open);
+            final RouterLink link = new RouterLink(null, FullReportView.class);
+            open.addClickListener(event -> {
+                VaadinSession.getCurrent().setAttribute(Report.class, this.report);
+                this.getUI().ifPresent(ui -> ui.getPage().open(link.getHref()));
+            });
+            open.addClickShortcut(Key.ENTER, KeyModifier.CONTROL);
+            layout.add(open);
+        }
+
         layout.setAlignItems(Alignment.CENTER);
         layout.setJustifyContentMode(JustifyContentMode.BETWEEN);
         layout.setWidthFull();

@@ -1,0 +1,15 @@
+[part~='toolbar-group-glyph-transformation'] {
+    display: none;
+}
+
+[part~='toolbar-group-alignment'] {
+    display: none;
+}
+
+[part~='toolbar-group-rich-text'] {
+    display: none;
+}
+
+[part~='toolbar-group-format'] {
+    display: none;
+}

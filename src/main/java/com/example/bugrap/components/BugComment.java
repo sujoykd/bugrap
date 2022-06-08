@@ -11,6 +11,7 @@ import com.vaadin.flow.component.Component;
 import com.vaadin.flow.component.avatar.Avatar;
 import com.vaadin.flow.component.html.Anchor;
 import com.vaadin.flow.component.html.Span;
+import com.vaadin.flow.component.icon.Icon;
 import com.vaadin.flow.component.icon.VaadinIcon;
 import com.vaadin.flow.component.orderedlayout.FlexLayout;
 import com.vaadin.flow.component.orderedlayout.HorizontalLayout;
@@ -54,13 +55,22 @@ public class BugComment extends HorizontalLayout {
 
         if (this.comment.getType() == Type.ATTACHMENT) {
             final Span numberOfAttachments = new Span("1 attachment");
+            numberOfAttachments.getStyle().set("font-weight", "500");
+            numberOfAttachments.getStyle().set("color", "var(--lumo-contrast-70pct)");
 
             final StreamResource resource = new StreamResource(this.comment.getAttachmentName(),
                     () -> new ByteArrayInputStream(this.comment.getAttachment()));
 
             final HorizontalLayout fileLayout = new HorizontalLayout();
-            fileLayout.add(VaadinIcon.FILE_O.create());
-            fileLayout.add(new Span(this.comment.getAttachmentName()));
+            fileLayout.setAlignItems(Alignment.CENTER);
+
+            final Icon fileIcon = VaadinIcon.FILE_O.create();
+            fileIcon.getStyle().set("font-size", "var(--lumo-font-size-xxs)");
+
+            final Span attachmentName = new Span(this.comment.getAttachmentName());
+            attachmentName.getStyle().set("font-weight", "500");
+
+            fileLayout.add(fileIcon, attachmentName);
             fileLayout.getStyle().set("padding-left", "var(--lumo-space-l)");
 
             final Anchor attachmentLink = new Anchor();

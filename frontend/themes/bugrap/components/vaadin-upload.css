@@ -1,0 +1,7 @@
+[part~='upload-button'] {
+    background-color: var(--lumo-base-color);
+}
+
+[part~='drop-label'] {
+    color: var(--lumo-contrast);
+}
