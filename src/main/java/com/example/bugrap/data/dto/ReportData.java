@@ -13,11 +13,11 @@ import org.vaadin.bugrap.domain.entities.Reporter;
 
 public class ReportData {
     final Project project;
-    final Priority priority;
-    final Type type;
-    final Status status;
-    final Reporter assignedTo;
-    final ProjectVersion version;
+    Priority priority;
+    Type type;
+    Status status;
+    Reporter assignedTo;
+    ProjectVersion version;
 
     public ReportData(Report report) {
         this.project = report.getProject();
@@ -47,28 +47,48 @@ public class ReportData {
                 .get().orElse(null);
     }
 
-    public Project getProject() {
-        return this.project;
-    }
-
     public Priority getPriority() {
         return this.priority;
+    }
+
+    public void setPriority(Priority priority) {
+        this.priority = priority;
     }
 
     public Type getType() {
         return this.type;
     }
 
+    public void setType(Type type) {
+        this.type = type;
+    }
+
     public Status getStatus() {
         return this.status;
+    }
+
+    public void setStatus(Status status) {
+        this.status = status;
     }
 
     public Reporter getAssignedTo() {
         return this.assignedTo;
     }
 
+    public void setAssignedTo(Reporter assignedTo) {
+        this.assignedTo = assignedTo;
+    }
+
     public ProjectVersion getVersion() {
         return this.version;
+    }
+
+    public void setVersion(ProjectVersion version) {
+        this.version = version;
+    }
+
+    public Project getProject() {
+        return this.project;
     }
 
 }

@@ -37,6 +37,7 @@
       box-shadow: var(--lumo-box-shadow-s);
       border-radius: 5px;
       border: 1px solid var(--lumo-contrast-20pct);
+      height: auto;
 }
 
 .ui-full-project-name {
@@ -54,4 +55,10 @@
       border-left: var(--lumo-space-l) solid var(--lumo-secondary-color);
       width: 0px;
       height: 0px;
+}
+
+.ui-comment-scroller {
+      display: flex;
+      flex-grow: 1;
+      height: 100px;
 }

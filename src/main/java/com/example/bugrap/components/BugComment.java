@@ -25,7 +25,7 @@ public class BugComment extends HorizontalLayout {
     public BugComment(Comment comment) {
         this.comment = comment;
         this.addClassName("ui-bug-comment");
-        this.setSizeFull();
+        this.setWidthFull();
 
         final Component commentText = this.commentText();
         final Component attachmentSection = this.attachmentSection();

@@ -52,6 +52,7 @@ public class SingleReportViewer extends VerticalLayout {
     private Component comments() {
         final Scroller scroller = new Scroller(ScrollDirection.VERTICAL);
         scroller.setWidthFull();
+        scroller.addClassName("ui-comment-scroller");
         final VerticalLayout layout = new VerticalLayout();
         layout.setPadding(false);
 

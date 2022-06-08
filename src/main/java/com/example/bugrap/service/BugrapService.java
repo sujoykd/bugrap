@@ -2,6 +2,7 @@ package com.example.bugrap.service;
 
 import java.util.Arrays;
 import java.util.Comparator;
+import java.util.Date;
 import java.util.List;
 import java.util.Set;
 import java.util.stream.Collectors;
@@ -29,6 +30,7 @@ import org.vaadin.bugrap.domain.spring.ReportRepository;
 import org.vaadin.bugrap.domain.spring.ReporterRepository;
 
 import com.example.bugrap.data.dto.BugDistributionData;
+import com.example.bugrap.data.dto.ReportData;
 import com.example.bugrap.security.SecurityService;
 import com.vaadin.flow.data.provider.Query;
 import com.vaadin.flow.spring.annotation.SpringComponent;
@@ -98,13 +100,13 @@ public class BugrapService {
         final Report report = new Report();
         report.setProject(project);
         report.setSummary(summary);
+
         if (projectVersion != ALL_VERSIONS) {
             report.setVersion(projectVersion);
         }
+
         if (reportsForSelf) {
-            final String username = this.securityService.get().map(UserDetails::getUsername).orElse(null);
-            final Reporter reporter = this.reporterRepository.getByNameOrEmail(username, null);
-            report.setAssigned(reporter);
+            report.setAssigned(this.loggedInReporter());
         }
 
         return this.reportRepository
@@ -119,6 +121,11 @@ public class BugrapService {
                                 Sort.by("version").ascending()
                                         .and(Sort.by("priority").descending())))
                 .stream().filter(rpt -> ObjectUtils.isEmpty(selectedStatusSet) || selectedStatusSet.contains(rpt.getStatus()));
+    }
+
+    private Reporter loggedInReporter() {
+        final String username = this.securityService.get().map(UserDetails::getUsername).orElse(null);
+        return this.reporterRepository.getByNameOrEmail(username, null);
     }
 
     public BugDistributionData fetchBugDistributionData(Project project, ProjectVersion version) {
@@ -143,6 +150,38 @@ public class BugrapService {
 
     public List<Comment> allComments(Report report) {
         return this.commentRepository.findAllByReportOrderByTimestampDesc(report);
+    }
+
+    public void saveReport(ReportData reportData, Report report) {
+        final Report updatedReport = this.updateReport(report, reportData);
+        this.reportRepository.save(updatedReport);
+    }
+
+    public void saveReports(ReportData reportData, Set<Report> reports) {
+        final Set<Report> updatedReports = reports.stream().map(report -> this.updateReport(report, reportData)).collect(Collectors.toSet());
+        this.reportRepository.saveAll(updatedReports);
+    }
+
+    private Report updateReport(Report report, ReportData reportData) {
+        report.setPriority(reportData.getPriority());
+        report.setType(reportData.getType());
+        report.setStatus(reportData.getStatus());
+        report.setAssigned(reportData.getAssignedTo());
+        report.setVersion(reportData.getVersion());
+        return report;
+    }
+
+    public void saveComment(Report report, byte[] uploadedAttachment, String uploadedAttachmentName, String commentText) {
+        final Comment comment = new Comment();
+        comment.setComment(commentText);
+        comment.setTimestamp(new Date());
+        comment.setReport(report);
+        comment.setType(commentText != null ? Comment.Type.COMMENT : Comment.Type.ATTACHMENT);
+        comment.setAttachmentName(uploadedAttachmentName);
+        comment.setAttachment(uploadedAttachment);
+        comment.setAuthor(this.loggedInReporter());
+
+        this.commentRepository.save(comment);
     }
 
 }
