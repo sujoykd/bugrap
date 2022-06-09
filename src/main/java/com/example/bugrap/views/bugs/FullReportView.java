@@ -35,6 +35,11 @@ public class FullReportView extends VerticalLayout implements AfterNavigationObs
         this.setPadding(false);
         this.setSpacing(false);
         this.setSizeFull();
+        this.setupEventHandlers();
+    }
+
+    private void setupEventHandlers() {
+        this.fullViewCommentEditor.addCommentAddedEventListener(event -> this.singleReportViewer.updateComments());
     }
 
     @Override

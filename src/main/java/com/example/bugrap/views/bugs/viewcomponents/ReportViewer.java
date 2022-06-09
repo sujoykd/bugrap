@@ -6,7 +6,9 @@ import org.apache.commons.lang3.ObjectUtils;
 import org.vaadin.bugrap.domain.entities.Report;
 
 import com.example.bugrap.views.bugs.events.ReportSelectionEvent;
+import com.vaadin.flow.component.DetachEvent;
 import com.vaadin.flow.component.orderedlayout.VerticalLayout;
+import com.vaadin.flow.shared.Registration;
 import com.vaadin.flow.spring.annotation.SpringComponent;
 import com.vaadin.flow.spring.annotation.UIScope;
 
@@ -16,6 +18,9 @@ public class ReportViewer extends VerticalLayout {
     BugsReportBody bugsReportBody;
     SingleReportViewer singleReportViewer;
     MultiReportViewer multiReportViewer;
+
+    Registration singleUpdateListenerRegistration;
+    Registration multiUpdateListenerRegistration;
 
     public ReportViewer(BugsReportBody bugsReportBody, SingleReportViewer singleReportViewer, MultiReportViewer multiReportViewer) {
         this.bugsReportBody = bugsReportBody;
@@ -46,12 +51,31 @@ public class ReportViewer extends VerticalLayout {
         this.removeAll();
         this.add(this.multiReportViewer);
         this.multiReportViewer.forReports(reports);
+        this.multiReportViewer.addReportPostUpdateEventListener(event -> {
+            this.bugsReportBody.updateReportGrid();
+        });
     }
 
     private void setupSingleReportView(Report report) {
         this.removeAll();
         this.add(this.singleReportViewer);
         this.singleReportViewer.forReport(report, true);
+        this.singleReportViewer.addReportPostUpdateEventListener(event -> {
+            this.bugsReportBody.updateReportGrid();
+        });
+    }
+
+    @Override
+    protected void onDetach(DetachEvent detachEvent) {
+        super.onDetach(detachEvent);
+
+        if (this.singleUpdateListenerRegistration != null) {
+            this.singleUpdateListenerRegistration.remove();
+        }
+
+        if (this.multiUpdateListenerRegistration != null) {
+            this.multiUpdateListenerRegistration.remove();
+        }
     }
 
 }

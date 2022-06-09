@@ -300,7 +300,7 @@ public class BugsReportBody extends VerticalLayout {
         return layout;
     }
 
-    private void updateReportGrid() {
+    public void updateReportGrid() {
         this.reportGrid.setItems(Collections.emptyList());
         this.reportGrid.setItems(query -> this.bugrapService.reportsFor(this.selectedProject, this.selectedVersion, this.reportsForSelf,
                 this.selectedStatusSet, this.searchTextValue, query));

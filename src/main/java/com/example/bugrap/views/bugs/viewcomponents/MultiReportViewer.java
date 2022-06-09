@@ -6,11 +6,14 @@ import org.vaadin.bugrap.domain.entities.Report;
 
 import com.example.bugrap.components.BugReportEdit;
 import com.example.bugrap.service.BugrapService;
+import com.example.bugrap.views.bugs.events.ReportPostUpdateEvent;
 import com.vaadin.flow.component.Component;
+import com.vaadin.flow.component.ComponentEventListener;
 import com.vaadin.flow.component.DetachEvent;
 import com.vaadin.flow.component.html.Span;
 import com.vaadin.flow.component.orderedlayout.HorizontalLayout;
 import com.vaadin.flow.component.orderedlayout.VerticalLayout;
+import com.vaadin.flow.shared.Registration;
 import com.vaadin.flow.spring.annotation.SpringComponent;
 import com.vaadin.flow.spring.annotation.UIScope;
 
@@ -19,6 +22,8 @@ import com.vaadin.flow.spring.annotation.UIScope;
 public class MultiReportViewer extends VerticalLayout {
     Set<Report> reports;
     BugrapService bugrapService;
+
+    BugReportEdit bugReportEdit;
 
     public MultiReportViewer(BugrapService bugrapService) {
         this.bugrapService = bugrapService;
@@ -29,9 +34,10 @@ public class MultiReportViewer extends VerticalLayout {
 
     public void forReports(Set<Report> reports) {
         this.reports = reports;
+        this.bugReportEdit = new BugReportEdit(this.reports, this.bugrapService);
 
         this.add(this.heading());
-        this.add(new BugReportEdit(this.reports, this.bugrapService));
+        this.add(this.bugReportEdit);
     }
 
     private Component heading() {
@@ -52,5 +58,9 @@ public class MultiReportViewer extends VerticalLayout {
     protected void onDetach(DetachEvent detachEvent) {
         super.onDetach(detachEvent);
         this.removeAll();
+    }
+
+    public Registration addReportPostUpdateEventListener(ComponentEventListener<ReportPostUpdateEvent> listener) {
+        return this.bugReportEdit.addReportPostUpdateEventListener(listener);
     }
 }

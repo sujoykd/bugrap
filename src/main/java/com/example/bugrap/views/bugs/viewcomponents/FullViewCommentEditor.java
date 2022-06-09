@@ -8,7 +8,9 @@ import org.vaadin.bugrap.domain.entities.Report;
 
 import com.example.bugrap.components.BugButton;
 import com.example.bugrap.service.BugrapService;
+import com.example.bugrap.views.bugs.events.CommentAddedEvent;
 import com.vaadin.flow.component.Component;
+import com.vaadin.flow.component.ComponentEventListener;
 import com.vaadin.flow.component.button.Button;
 import com.vaadin.flow.component.button.ButtonVariant;
 import com.vaadin.flow.component.html.H5;
@@ -22,6 +24,7 @@ import com.vaadin.flow.component.orderedlayout.VerticalLayout;
 import com.vaadin.flow.component.richtexteditor.RichTextEditor;
 import com.vaadin.flow.component.upload.Upload;
 import com.vaadin.flow.component.upload.receivers.MemoryBuffer;
+import com.vaadin.flow.shared.Registration;
 import com.vaadin.flow.spring.annotation.SpringComponent;
 import com.vaadin.flow.spring.annotation.UIScope;
 
@@ -124,6 +127,7 @@ public class FullViewCommentEditor extends VerticalLayout {
             final String commentText = this.richTextEditor.asHtml().getValue();
             if (commentText != null || this.uploadedAttachment != null) {
                 this.bugrapService.saveComment(this.report, this.uploadedAttachment, this.uploadedAttachmentName, commentText);
+                this.fireEvent(new CommentAddedEvent(this));
             }
             this.singleFileUpload.clearFileList();
             this.richTextEditor.clear();
@@ -131,6 +135,10 @@ public class FullViewCommentEditor extends VerticalLayout {
 
         layout.add(commentBtn, cancelBtn);
         return layout;
+    }
+
+    public Registration addCommentAddedEventListener(ComponentEventListener<CommentAddedEvent> listener) {
+        return this.addListener(CommentAddedEvent.class, listener);
     }
 
 }

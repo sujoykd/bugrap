@@ -12,7 +12,9 @@ import org.vaadin.bugrap.domain.entities.Reporter;
 
 import com.example.bugrap.data.dto.ReportData;
 import com.example.bugrap.service.BugrapService;
+import com.example.bugrap.views.bugs.events.ReportPostUpdateEvent;
 import com.vaadin.flow.component.Component;
+import com.vaadin.flow.component.ComponentEventListener;
 import com.vaadin.flow.component.button.Button;
 import com.vaadin.flow.component.button.ButtonVariant;
 import com.vaadin.flow.component.icon.VaadinIcon;
@@ -23,6 +25,7 @@ import com.vaadin.flow.component.select.Select;
 import com.vaadin.flow.data.binder.BeanValidationBinder;
 import com.vaadin.flow.data.binder.Binder;
 import com.vaadin.flow.data.renderer.ComponentRenderer;
+import com.vaadin.flow.shared.Registration;
 
 public class BugReportEdit extends HorizontalLayout {
     Set<Report> reports;
@@ -75,6 +78,7 @@ public class BugReportEdit extends HorizontalLayout {
                 } else {
                     this.bugrapService.saveReport(this.reportData, this.report);
                 }
+                this.fireEvent(new ReportPostUpdateEvent(this));
                 Notification.show("Saved successfully", 3000, Position.TOP_CENTER);
             } else {
                 Notification.show("Validations failed", 3000, Position.TOP_CENTER);
@@ -130,4 +134,9 @@ public class BugReportEdit extends HorizontalLayout {
 
         return dropdowns;
     }
+
+    public Registration addReportPostUpdateEventListener(ComponentEventListener<ReportPostUpdateEvent> listener) {
+        return this.addListener(ReportPostUpdateEvent.class, listener);
+    }
+
 }

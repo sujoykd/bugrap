@@ -10,7 +10,9 @@ import com.example.bugrap.components.BugComment;
 import com.example.bugrap.components.BugReportEdit;
 import com.example.bugrap.service.BugrapService;
 import com.example.bugrap.views.bugs.FullReportView;
+import com.example.bugrap.views.bugs.events.ReportPostUpdateEvent;
 import com.vaadin.flow.component.Component;
+import com.vaadin.flow.component.ComponentEventListener;
 import com.vaadin.flow.component.DetachEvent;
 import com.vaadin.flow.component.Key;
 import com.vaadin.flow.component.KeyModifier;
@@ -25,6 +27,7 @@ import com.vaadin.flow.component.orderedlayout.Scroller.ScrollDirection;
 import com.vaadin.flow.component.orderedlayout.VerticalLayout;
 import com.vaadin.flow.router.RouterLink;
 import com.vaadin.flow.server.VaadinSession;
+import com.vaadin.flow.shared.Registration;
 import com.vaadin.flow.spring.annotation.SpringComponent;
 import com.vaadin.flow.spring.annotation.UIScope;
 
@@ -33,6 +36,9 @@ import com.vaadin.flow.spring.annotation.UIScope;
 public class SingleReportViewer extends VerticalLayout {
     Report report;
     BugrapService bugrapService;
+
+    BugReportEdit bugReportEdit;
+    VerticalLayout commentLayout;
 
     public SingleReportViewer(BugrapService bugrapService) {
         this.bugrapService = bugrapService;
@@ -43,28 +49,33 @@ public class SingleReportViewer extends VerticalLayout {
 
     public void forReport(Report report, boolean showOpenButton) {
         this.report = report;
+        this.bugReportEdit = new BugReportEdit(this.report, this.bugrapService);
 
         this.add(this.heading(showOpenButton));
-        this.add(new BugReportEdit(this.report, this.bugrapService));
+        this.add(this.bugReportEdit);
         this.add(this.comments());
     }
 
     private Component comments() {
+        this.commentLayout = new VerticalLayout();
+        this.commentLayout.setPadding(false);
+        this.updateComments();
+
         final Scroller scroller = new Scroller(ScrollDirection.VERTICAL);
         scroller.setWidthFull();
         scroller.addClassName("ui-comment-scroller");
-        final VerticalLayout layout = new VerticalLayout();
-        layout.setPadding(false);
+        scroller.setContent(this.commentLayout);
+        return scroller;
+    }
 
+    public void updateComments() {
         final List<Comment> allComments = this.bugrapService.allComments(this.report);
         if (ObjectUtils.isNotEmpty(allComments)) {
-            allComments.forEach(comment -> layout.add(new BugComment(comment)));
+            allComments.forEach(comment -> this.commentLayout.add(new BugComment(comment)));
         } else {
             final Paragraph noComments = new Paragraph("No comments found");
-            layout.add(noComments);
+            this.commentLayout.add(noComments);
         }
-        scroller.setContent(layout);
-        return scroller;
     }
 
     private Component heading(boolean showOpenButton) {
@@ -97,6 +108,10 @@ public class SingleReportViewer extends VerticalLayout {
     protected void onDetach(DetachEvent detachEvent) {
         super.onDetach(detachEvent);
         this.removeAll();
+    }
+
+    public Registration addReportPostUpdateEventListener(ComponentEventListener<ReportPostUpdateEvent> listener) {
+        return this.bugReportEdit.addReportPostUpdateEventListener(listener);
     }
 
 }
