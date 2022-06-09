@@ -18,8 +18,7 @@ import com.vaadin.flow.component.ComponentEventListener;
 import com.vaadin.flow.component.button.Button;
 import com.vaadin.flow.component.button.ButtonVariant;
 import com.vaadin.flow.component.icon.VaadinIcon;
-import com.vaadin.flow.component.notification.Notification;
-import com.vaadin.flow.component.notification.Notification.Position;
+import com.vaadin.flow.component.notification.NotificationVariant;
 import com.vaadin.flow.component.orderedlayout.HorizontalLayout;
 import com.vaadin.flow.component.select.Select;
 import com.vaadin.flow.data.binder.BeanValidationBinder;
@@ -79,9 +78,9 @@ public class BugReportEdit extends HorizontalLayout {
                     this.bugrapService.saveReport(this.reportData, this.report);
                 }
                 this.fireEvent(new ReportPostUpdateEvent(this));
-                Notification.show("Saved successfully", 3000, Position.TOP_CENTER);
+                new BugNotification("Saved successfully").withThemeVariants(NotificationVariant.LUMO_SUCCESS).open();
             } else {
-                Notification.show("Validations failed", 3000, Position.TOP_CENTER);
+                new BugNotification("Validations failed").withThemeVariants(NotificationVariant.LUMO_ERROR).open();
             }
         });
 
@@ -101,7 +100,6 @@ public class BugReportEdit extends HorizontalLayout {
         prioritySelect.setLabel("Priority");
         prioritySelect.setRenderer(new ComponentRenderer<>(BugPriorityDisplay::new));
         prioritySelect.setItems(this.bugrapService.allPriorities());
-        prioritySelect.addValueChangeListener(event -> System.out.println(event.getValue()));
 
         final Select<Type> typeSelect = new Select<>();
         typeSelect.setLabel("Type");

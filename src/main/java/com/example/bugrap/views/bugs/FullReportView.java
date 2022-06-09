@@ -4,13 +4,13 @@ import javax.annotation.security.PermitAll;
 
 import org.vaadin.bugrap.domain.entities.Report;
 
+import com.example.bugrap.components.BugNotification;
 import com.example.bugrap.service.BugrapService;
 import com.example.bugrap.views.bugs.viewcomponents.FullViewCommentEditor;
 import com.example.bugrap.views.bugs.viewcomponents.FullViewHeader;
 import com.example.bugrap.views.bugs.viewcomponents.SingleReportViewer;
 import com.vaadin.flow.component.UI;
-import com.vaadin.flow.component.notification.Notification;
-import com.vaadin.flow.component.notification.Notification.Position;
+import com.vaadin.flow.component.notification.NotificationVariant;
 import com.vaadin.flow.component.orderedlayout.VerticalLayout;
 import com.vaadin.flow.router.AfterNavigationEvent;
 import com.vaadin.flow.router.AfterNavigationObserver;
@@ -47,7 +47,7 @@ public class FullReportView extends VerticalLayout implements AfterNavigationObs
         this.report = VaadinSession.getCurrent().getAttribute(Report.class);
         if (this.report == null) {
             UI.getCurrent().navigate(BugsView.class);
-            Notification.show("Please select a report", 5000, Position.TOP_CENTER);
+            new BugNotification("Please select a report").withThemeVariants(NotificationVariant.LUMO_ERROR).open();
         } else {
             this.setupUI();
         }

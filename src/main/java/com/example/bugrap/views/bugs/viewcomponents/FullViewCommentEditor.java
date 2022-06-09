@@ -7,17 +7,17 @@ import org.springframework.http.MediaType;
 import org.vaadin.bugrap.domain.entities.Report;
 
 import com.example.bugrap.components.BugButton;
+import com.example.bugrap.components.BugNotification;
 import com.example.bugrap.service.BugrapService;
 import com.example.bugrap.views.bugs.events.CommentAddedEvent;
 import com.vaadin.flow.component.Component;
 import com.vaadin.flow.component.ComponentEventListener;
 import com.vaadin.flow.component.button.Button;
 import com.vaadin.flow.component.button.ButtonVariant;
+import com.vaadin.flow.component.html.H4;
 import com.vaadin.flow.component.html.H5;
 import com.vaadin.flow.component.html.Span;
 import com.vaadin.flow.component.icon.VaadinIcon;
-import com.vaadin.flow.component.notification.Notification;
-import com.vaadin.flow.component.notification.Notification.Position;
 import com.vaadin.flow.component.notification.NotificationVariant;
 import com.vaadin.flow.component.orderedlayout.HorizontalLayout;
 import com.vaadin.flow.component.orderedlayout.VerticalLayout;
@@ -95,13 +95,11 @@ public class FullViewCommentEditor extends VerticalLayout {
         this.singleFileUpload.setSizeFull();
 
         this.singleFileUpload.addFileRejectedListener(event -> {
-            System.out.println(event.getErrorMessage());
-            Notification.show("rejected", 2000, Position.TOP_CENTER).addThemeVariants(NotificationVariant.LUMO_ERROR);
+            this.rejectionNotification();
         });
 
         this.singleFileUpload.addFailedListener(event -> {
-            System.out.println("failed!");
-            Notification.show("failed", 2000, Position.TOP_CENTER).addThemeVariants(NotificationVariant.LUMO_ERROR);
+            new BugNotification("Upload failed").withThemeVariants(NotificationVariant.LUMO_ERROR).open();
         });
 
         this.singleFileUpload.addSucceededListener(event -> {
@@ -109,12 +107,28 @@ public class FullViewCommentEditor extends VerticalLayout {
             try {
                 this.uploadedAttachment = memoryBuffer.getInputStream().readAllBytes();
             } catch (final IOException ex) {
-                Notification.show("Upload failed", 2000, Position.TOP_CENTER).addThemeVariants(NotificationVariant.LUMO_ERROR);
+                new BugNotification("Upload failed").withThemeVariants(NotificationVariant.LUMO_ERROR).open();
             }
         });
 
         layout.add(this.singleFileUpload);
         return layout;
+    }
+
+    private void rejectionNotification() {
+        new BugNotification(() -> {
+            final VerticalLayout notificationLayout = new VerticalLayout();
+            notificationLayout.setPadding(false);
+            notificationLayout.setSpacing(false);
+
+            final H4 heading = new H4("File upload failed");
+            heading.getStyle().set("margin", "0px");
+            heading.getStyle().set("color", "var(--lumo-base-color)");
+
+            notificationLayout.add(heading);
+            notificationLayout.add(new Span("File format not supported. Allowed file formats: PDF, PNG and JPG."));
+            return notificationLayout;
+        }).withThemeVariants(NotificationVariant.LUMO_ERROR).open();
     }
 
     private Component buttons() {
