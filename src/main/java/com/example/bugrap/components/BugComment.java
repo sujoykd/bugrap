@@ -37,7 +37,11 @@ public class BugComment extends HorizontalLayout {
 
     private Component commentText() {
         final FlexLayout layout = new FlexLayout();
-        layout.add(new Span(this.comment.getComment()));
+
+        final Span commentText = new Span();
+        commentText.getElement().setProperty("innerHTML", this.comment.getComment());
+
+        layout.add(commentText);
         return layout;
     }
 

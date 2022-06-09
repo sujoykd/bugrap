@@ -69,6 +69,7 @@ public class SingleReportViewer extends VerticalLayout {
     }
 
     public void updateComments() {
+        this.commentLayout.removeAll();
         final List<Comment> allComments = this.bugrapService.allComments(this.report);
         if (ObjectUtils.isNotEmpty(allComments)) {
             allComments.forEach(comment -> this.commentLayout.add(new BugComment(comment)));
