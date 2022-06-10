@@ -15,6 +15,9 @@ import com.example.bugrap.service.BugrapService;
 import com.example.bugrap.views.bugs.events.ReportPostUpdateEvent;
 import com.vaadin.flow.component.Component;
 import com.vaadin.flow.component.ComponentEventListener;
+import com.vaadin.flow.component.Key;
+import com.vaadin.flow.component.KeyModifier;
+import com.vaadin.flow.component.ShortcutRegistration;
 import com.vaadin.flow.component.button.Button;
 import com.vaadin.flow.component.button.ButtonVariant;
 import com.vaadin.flow.component.icon.VaadinIcon;
@@ -83,6 +86,8 @@ public class BugReportEdit extends HorizontalLayout {
                 new BugNotification("Validations failed").withThemeVariants(NotificationVariant.LUMO_ERROR).open();
             }
         });
+        final ShortcutRegistration shortcut = saveChanges.addClickShortcut(Key.KEY_S, KeyModifier.CONTROL);
+        shortcut.setBrowserDefaultAllowed(false);
 
         final Button revert = new BugButton("Revert", VaadinIcon.ROTATE_LEFT.create()).lumoBaseColor();
         revert.addThemeVariants(ButtonVariant.LUMO_TERTIARY);

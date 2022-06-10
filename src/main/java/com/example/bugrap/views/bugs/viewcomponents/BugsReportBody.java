@@ -151,6 +151,8 @@ public class BugsReportBody extends VerticalLayout {
                 .setHeader("Reported")
                 .setComparator(Report::getReportedTimestamp);
 
+        this.reportGrid.setMultiSort(true);
+
         this.reportGrid.addSelectionListener(selection -> {
             this.fireEvent(new ReportSelectionEvent(this, selection.getAllSelectedItems()));
         });
