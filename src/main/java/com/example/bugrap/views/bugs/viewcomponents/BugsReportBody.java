@@ -1,7 +1,6 @@
 package com.example.bugrap.views.bugs.viewcomponents;
 
 import java.util.Collections;
-import java.util.Comparator;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Optional;
@@ -12,7 +11,9 @@ import org.springframework.util.StringUtils;
 import org.vaadin.bugrap.domain.entities.Project;
 import org.vaadin.bugrap.domain.entities.ProjectVersion;
 import org.vaadin.bugrap.domain.entities.Report;
+import org.vaadin.bugrap.domain.entities.Report.Priority;
 import org.vaadin.bugrap.domain.entities.Report.Status;
+import org.vaadin.bugrap.domain.entities.Report.Type;
 import org.vaadin.bugrap.domain.entities.Reporter;
 
 import com.example.bugrap.components.BugButton;
@@ -119,32 +120,36 @@ public class BugsReportBody extends VerticalLayout {
 
         this.versionColumn = this.reportGrid
                 .addColumn(report -> Optional.ofNullable(report.getVersion()).map(ProjectVersion::getVersion).orElse(""))
+                .setKey("version")
                 .setHeader("Version")
-                .setSortable(true)
-                .setComparator(Comparator
-                        .comparing(report -> Optional.ofNullable(report.getVersion()).map(ProjectVersion::getVersion).orElse("")));
+                .setComparator(report -> Optional.ofNullable(report.getVersion()).map(ProjectVersion::getVersion).orElse(""));
         this.reportGrid
                 .addColumn(new ComponentRenderer<>(report -> new BugPriorityDisplay(report.getPriority())))
+                .setKey("priority")
                 .setHeader("Priority")
-                .setSortable(true)
-                .setComparator(Comparator.comparing(report -> report.getPriority().ordinal()));
+                .setComparator(report -> Optional.ofNullable(report.getPriority()).map(Priority::ordinal).orElse(-1));
         this.reportGrid
                 .addColumn(report -> Optional.ofNullable(report.getType())
                         .map(type -> StringUtils.capitalize(type.toString().toLowerCase())).orElse(""))
+                .setKey("type")
                 .setHeader("Type")
-                .setSortable(true);
+                .setComparator(report -> Optional.ofNullable(report.getType()).map(Type::toString).orElse(""));
         this.reportGrid.addColumn(Report::getSummary)
+                .setKey("summary")
                 .setHeader("Summary")
-                .setSortable(true);
+                .setComparator(Report::getSummary);
         this.reportGrid.addColumn(report -> Optional.ofNullable(report.getAssigned()).map(Reporter::getName).orElse(""))
+                .setKey("assignedTo")
                 .setHeader("Assigned to")
-                .setSortable(true);
+                .setComparator(report -> Optional.ofNullable(report.getAssigned()).map(Reporter::getName).orElse(""));
         this.reportGrid.addColumn(report -> GenericUtil.relativeTimeSpan(report.getTimestamp()))
+                .setKey("lastModifiedOn")
                 .setHeader("Last modified")
-                .setSortable(true);
+                .setComparator(Report::getTimestamp);
         this.reportGrid.addColumn(report -> GenericUtil.relativeTimeSpan(report.getReportedTimestamp()))
+                .setKey("reportedOn")
                 .setHeader("Reported")
-                .setSortable(true);
+                .setComparator(Report::getReportedTimestamp);
 
         this.reportGrid.addSelectionListener(selection -> {
             this.fireEvent(new ReportSelectionEvent(this, selection.getAllSelectedItems()));

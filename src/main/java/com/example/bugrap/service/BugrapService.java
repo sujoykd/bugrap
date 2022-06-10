@@ -4,6 +4,7 @@ import java.util.Arrays;
 import java.util.Comparator;
 import java.util.Date;
 import java.util.List;
+import java.util.Optional;
 import java.util.Set;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
@@ -13,7 +14,6 @@ import org.springframework.data.domain.Example;
 import org.springframework.data.domain.ExampleMatcher;
 import org.springframework.data.domain.ExampleMatcher.GenericPropertyMatchers;
 import org.springframework.data.domain.PageRequest;
-import org.springframework.data.domain.Sort;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.vaadin.bugrap.domain.entities.Comment;
 import org.vaadin.bugrap.domain.entities.Project;
@@ -117,10 +117,16 @@ public class BugrapService {
                                         .withMatcher("summary", GenericPropertyMatchers.contains().ignoreCase())),
                         PageRequest.of(
                                 query.getPage(),
-                                query.getPageSize(),
-                                Sort.by("version").ascending()
-                                        .and(Sort.by("priority").descending())))
-                .stream().filter(rpt -> ObjectUtils.isEmpty(selectedStatusSet) || selectedStatusSet.contains(rpt.getStatus()));
+                                query.getPageSize()))
+                .stream().filter(rpt -> ObjectUtils.isEmpty(selectedStatusSet) || selectedStatusSet.contains(rpt.getStatus()))
+                .sorted(query.getSortingComparator().orElseGet(this::defaultReportSorting));
+    }
+
+    private Comparator<Report> defaultReportSorting() {
+        return Comparator.comparing(
+                (Report report) -> Optional.ofNullable(report.getVersion()).map(ProjectVersion::getVersion).orElse(""),
+                Comparator.nullsFirst(String.CASE_INSENSITIVE_ORDER))
+                .thenComparing(Comparator.comparing((Report report) -> Optional.ofNullable(report.getPriority()).map(Priority::ordinal).orElse(-1)).reversed());
     }
 
     private Reporter loggedInReporter() {
