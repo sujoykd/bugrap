@@ -20,6 +20,7 @@ import com.vaadin.flow.component.KeyModifier;
 import com.vaadin.flow.component.ShortcutRegistration;
 import com.vaadin.flow.component.button.Button;
 import com.vaadin.flow.component.button.ButtonVariant;
+import com.vaadin.flow.component.html.Label;
 import com.vaadin.flow.component.icon.VaadinIcon;
 import com.vaadin.flow.component.notification.NotificationVariant;
 import com.vaadin.flow.component.orderedlayout.HorizontalLayout;
@@ -73,7 +74,7 @@ public class BugReportEdit extends HorizontalLayout {
 
         final Button saveChanges = new BugButton("Save changes").withTheme(ButtonVariant.LUMO_PRIMARY);
         saveChanges.addClickListener(event -> {
-            if (this.binder.isValid()) {
+            if (this.binder.validate().isOk()) {
                 this.binder.writeBeanIfValid(this.reportData);
                 if (this.multimode) {
                     this.bugrapService.saveReports(this.reportData, this.reports);
@@ -101,15 +102,21 @@ public class BugReportEdit extends HorizontalLayout {
     private Component changeDropdowns() {
         final HorizontalLayout dropdowns = new HorizontalLayout();
 
+        final Label prioritySelectHelper = new Label();
+        prioritySelectHelper.setVisible(false);
         final Select<Priority> prioritySelect = new Select<>();
         prioritySelect.setLabel("Priority");
         prioritySelect.setRenderer(new ComponentRenderer<>(BugPriorityDisplay::new));
         prioritySelect.setItems(this.bugrapService.allPriorities());
+        prioritySelect.setHelperComponent(prioritySelectHelper);
 
+        final Label typeSelectHelper = new Label();
+        typeSelectHelper.setVisible(false);
         final Select<Type> typeSelect = new Select<>();
         typeSelect.setLabel("Type");
         typeSelect.setItems(this.bugrapService.allReportTypes());
         typeSelect.setItemLabelGenerator(type -> StringUtils.capitalize(type.toString().toLowerCase()));
+        typeSelect.setHelperComponent(typeSelectHelper);
 
         final Select<Status> statusSelect = new Select<>();
         statusSelect.setLabel("Status");
@@ -128,11 +135,26 @@ public class BugReportEdit extends HorizontalLayout {
 
         dropdowns.add(prioritySelect, typeSelect, statusSelect, reporterSelect, versionSelect);
 
-        this.binder.bind(prioritySelect, ReportData::getPriority, ReportData::setPriority);
-        this.binder.bind(typeSelect, ReportData::getType, ReportData::setType);
+        this.binder.forField(prioritySelect)
+                .asRequired("Priority is required")
+                .withValidationStatusHandler(status -> {
+                    prioritySelectHelper.setVisible(status.isError());
+                    prioritySelectHelper.setText(status.getMessage().orElse(""));
+                    prioritySelect.setInvalid(status.isError());
+                    prioritySelectHelper.getStyle().set("color", "var(--lumo-error-color)");
+                })
+                .bind(ReportData::getPriority, ReportData::setPriority);
+        this.binder.forField(typeSelect).asRequired("Type is required")
+                .withValidationStatusHandler(status -> {
+                    typeSelectHelper.setVisible(status.isError());
+                    typeSelectHelper.setText(status.getMessage().orElse(""));
+                    typeSelect.setInvalid(status.isError());
+                    typeSelectHelper.getStyle().set("color", "var(--lumo-error-color)");
+                }).bind(ReportData::getType, ReportData::setType);
         this.binder.bind(statusSelect, ReportData::getStatus, ReportData::setStatus);
         this.binder.bind(reporterSelect, ReportData::getAssignedTo, ReportData::setAssignedTo);
         this.binder.bind(versionSelect, ReportData::getVersion, ReportData::setVersion);
+
         this.binder.readBean(this.reportData);
 
         return dropdowns;
